@@ -3,6 +3,12 @@ An Open-Source Engine Replacement for Cultures 2: The Gates of Asgards, Cultures
 
 OpenVikings is a fan-made, open-source project that intends to become a fully compatible engine replacement for Funatics' iconic 2D platformer games. The project's goals include fixing the original games' bugs and also eventually providing a modding interface, alongside of course making it possible to study or use the engine for new projects.
 
+## License
+
+This project is licensed under the GNU General Public License v3.0. This means that you are free to use, modify, and distribute the code as long as you also release your modifications under the same license.
+
+You can read the full text of the GPLv3 in the [LICENSE](./LICENSE) file.
+
 ## Disclaimer
 
 This project is a reverse engineering effort of an old game originally developed by **Funatics Software** and published by **Daedalic Entertainment**. The purpose of this project is solely for educational and research purposes.
