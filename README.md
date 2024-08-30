@@ -13,4 +13,4 @@ This project is a reverse engineering effort of an old game originally developed
 - **Funatics Software** and **Daedalic Entertainment** retain all rights to the original game, including trademarks, copyrights, and other intellectual property rights.
 - By using or contributing to this project, you agree that this project is intended for personal and non-commercial use. The project maintainers do not endorse or promote any form of copyright infringement.
 
-If you are a representative of **Funatics Software** or **Daedalic Entertainment** and have concerns about this project, please contact us directly, and we will address any issues promptly.
+If you are a representative of **Funatics Software** or **Daedalic Entertainment** and have concerns about this project, please contact me directly, and we will address any issues promptly.
