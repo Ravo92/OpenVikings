@@ -4,8 +4,24 @@ namespace OpenVikings.SystemHandles
 {
     internal class SaveFolderHandler
     {
-        private readonly string savesFolderPath = Path.Combine(Environment.ProcessPath!, ConstantsHandler.SAVES_FOLDER_NAME);
+        private readonly string savesFolderPath = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, ConstantsHandler.SAVES_FOLDER_NAME);
         internal static readonly char[] separator = [' '];
+        internal static readonly Dictionary<string, string> defaultConfigurations = new()
+            {
+            { "engine_lod", "0" },
+            { "music_mode", "2" },
+            { "fx_volume", "100" },
+            { "fx_quality", "2" },
+            { "fx_jingles_off", "1" },
+            { "dm_volume", "70" },
+            { "gui_scroll_speed", "2" },
+            { "gui_main_mode", "1" },
+            { "gui_expert_flag", "0" },
+            { "gui_tooltipsoff_flag", "0" },
+            { "gui_scroll_on_third_button", "1" },
+            { "gui_scroll_on_border", "1" },
+            { "gui_mouse_software", "0" }
+        };
 
         private bool SetSaveFolder()
         {
@@ -64,38 +80,18 @@ namespace OpenVikings.SystemHandles
 
         private static Dictionary<string, string> GetDefaultConfigurations()
         {
-            Dictionary<string, string> defaultConfigurations = new()
-            {
-            { "engine_lod", "0" },
-            { "music_mode", "2" },
-            { "fx_volume", "100" },
-            { "fx_quality", "2" },
-            { "fx_jingles_off", "1" },
-            { "dm_volume", "70" },
-            { "gui_scroll_speed", "2" },
-            { "gui_main_mode", "1" },
-            { "gui_expert_flag", "0" },
-            { "gui_tooltipsoff_flag", "0" },
-            { "gui_scroll_on_third_button", "1" },
-            { "gui_scroll_on_border", "1" },
-            { "gui_mouse_software", "0" }
-        };
-
             return defaultConfigurations;
         }
 
-        internal (string Key, string Value) GetConfiguration(string dateiPfad, string key)
+        internal static Dictionary<string, string> GetConfiguration(string dateiPfad, string key)
         {
             Dictionary<string, string> optionSetting = ParseINIFile(dateiPfad);
-
-            if (optionSetting.TryGetValue(key, out string value))
-            {
-                return (key, value);
-            }
+            if (optionSetting.TryGetValue(key, out string? value))
+                return new Dictionary<string, string> { { key, value } };
             else
-            {
                 Debug.WriteLine($"The key '{key}' was not found in the configuration file.");
-            }
+
+            return defaultConfigurations;
         }
 
         private static Dictionary<string, string> ParseINIFile(string dateiPfad)

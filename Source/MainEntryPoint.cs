@@ -154,11 +154,8 @@ class Program
     private static int data_56b3dc;
     private static int data_569cd0;
     private static int data_56b3d4;
-    private static IntPtr data_569bbc = Marshal.AllocHGlobal(0x104); // Puffer für den Modulnamen
-    private static IntPtr data_56b714 = IntPtr.Zero; // Beispielinitialisierung, anpassen nach Bedarf
-    private static IntPtr data_569a30;
-    private static IntPtr data_569a18;
-    private static int data_569a14;
+    private static IntPtr data_569bbc = Marshal.AllocHGlobal(260);
+    private static IntPtr data_56b714 = IntPtr.Zero;
     private static readonly uint data_56999c = 1;
     private static IntPtr data_50c230 = IntPtr.Zero;
     private static int data_4fe05c = 0;
@@ -170,9 +167,7 @@ class Program
     private static IntPtr data_50f6a4;
     private static IntPtr data_554d74;
     private static IntPtr data_50f698;
-    private static IntPtr data_50f69c;
     private static IntPtr data_4fe164;
-    private static Mutex? mutex;
 
     #endregion
 
@@ -188,6 +183,8 @@ class Program
 
         if (TryCreateMutex("weltwunder") == MutexCreationResult.Success)
         {
+            InitGameHandler.InitGame();
+
            // argumentHandler.SetGfxFullscreen("1");
            // argumentHandler.SetGfxFullscreenToggle("1");
            // argumentHandler.SetGfxScreenWidth("1280");

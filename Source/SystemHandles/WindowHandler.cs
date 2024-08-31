@@ -1,17 +1,19 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace OpenVikings.SystemHandles
 {
-    internal static class WindowHandler
+    internal static partial class WindowHandler
     {
-        // Windows API constants
-        private const int WS_OVERLAPPEDWINDOW = 0x00CF0000;
-        private const int WS_VISIBLE = 0x10000000;
+        private const int WS_OVERLAPPEDWINDOW = 13565952;
+        private const int WS_VISIBLE = 268435456;
         private const int SW_SHOW = 5;
 
-        // Windows API methods
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr CreateWindowEx(
+        [DllImport("user32.dll", EntryPoint = "RegisterClassW", SetLastError = true, CharSet = CharSet.Ansi)]
+        private static extern ushort RegisterClassW([In] ref WNDCLASS lpWndClass);
+
+        [DllImport("user32.dll", EntryPoint = "CreateWindowExW", SetLastError = true, CharSet = CharSet.Ansi)]
+        private static extern IntPtr CreateWindowExW(
             int dwExStyle,
             string lpClassName,
             string lpWindowName,
@@ -19,32 +21,39 @@ namespace OpenVikings.SystemHandles
             int x, int y, int nWidth, int nHeight,
             IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool DestroyWindow(IntPtr hWnd);
+        [LibraryImport("user32.dll", EntryPoint = "DestroyWindow", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool DestroyWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        [LibraryImport("user32.dll", EntryPoint = "ShowWindow", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr DefWindowProc(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
+        [LibraryImport("user32.dll", EntryPoint = "DefWindowProcA", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        private static partial IntPtr DefWindowProcA(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern ushort RegisterClass(ref WNDCLASS lpWndClass);
+        [LibraryImport("kernel32.dll", EntryPoint = "GetModuleHandleA", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        private static partial IntPtr GetModuleHandleA(string? lpModuleName);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr GetModuleHandle(string? lpModuleName);
+        [LibraryImport("user32.dll", EntryPoint = "PostQuitMessage", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        private static partial void PostQuitMessage(int nExitCode);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern void PostQuitMessage(int nExitCode);
+        [LibraryImport("user32.dll", EntryPoint = "GetMessageA", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool GetMessageA(out MSG lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool GetMessage(out MSG lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
+        [LibraryImport("user32.dll", EntryPoint = "TranslateMessage", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool TranslateMessage(ref MSG lpMsg);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool TranslateMessage(ref MSG lpMsg);
+        [LibraryImport("user32.dll", EntryPoint = "DispatchMessageA", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        private static partial IntPtr DispatchMessageA(ref MSG lpMsg);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr DispatchMessage(ref MSG lpMsg);
+        [DllImport("user32.dll", EntryPoint = "UnregisterClassW", SetLastError = true, CharSet = CharSet.Ansi)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool UnregisterClassW(string lpClassName, IntPtr hInstance);
+
+        private delegate IntPtr WndProcDelegate(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
 
         [StructLayout(LayoutKind.Sequential)]
         private struct WNDCLASS
@@ -57,7 +66,7 @@ namespace OpenVikings.SystemHandles
             public IntPtr hIcon;
             public IntPtr hCursor;
             public IntPtr hbrBackground;
-            public string lpszMenuName;
+            public string? lpszMenuName;
             public string lpszClassName;
         }
 
@@ -79,49 +88,78 @@ namespace OpenVikings.SystemHandles
             public int y;
         }
 
-        // Window Procedure to handle window messages
         private static IntPtr WindowProc(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam)
         {
+            Debug.WriteLine($"WindowProc: uMsg={uMsg}, hWnd={hWnd}, wParam={wParam}, lParam={lParam}");
+
             switch (uMsg)
             {
-                case 0x0010: // WM_CLOSE
+                case 16: // WM_CLOSE
+                    Debug.WriteLine("WindowProc: WM_CLOSE received");
                     DestroyWindow(hWnd);
                     PostQuitMessage(0);
                     return IntPtr.Zero;
             }
 
-            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+            return DefWindowProcA(hWnd, uMsg, wParam, lParam);
         }
 
         internal static void CreateFullScreenWindow(string windowName)
         {
-            // Get the module handle
-            IntPtr hInstance = GetModuleHandle(null);
+            Debug.WriteLine("Creating full screen window...");
 
-            // Register the window class
+            IntPtr hInstance = GetModuleHandleA(null);
+            Debug.WriteLine($"GetModuleHandle: hInstance={hInstance}");
+
+            bool unregistered = UnregisterClassW(ConstantsHandler.WINDOW_CLASS_NAME, hInstance);
+            Debug.WriteLine($"UnregisterClassW: unregistered={unregistered}, last error={Marshal.GetLastWin32Error()}");
+
+            WndProcDelegate wndProcDelegate = new(WindowProc);
+
             WNDCLASS wndClass = new()
             {
-                lpfnWndProc = Marshal.GetFunctionPointerForDelegate(WindowProc),
+                style = 0,
+                lpfnWndProc = Marshal.GetFunctionPointerForDelegate(wndProcDelegate),
+                cbClsExtra = 0,
+                cbWndExtra = 0,
                 hInstance = hInstance,
-                lpszClassName = windowName
+                hIcon = IntPtr.Zero,
+                hCursor = IntPtr.Zero,
+                hbrBackground = IntPtr.Zero,
+                lpszMenuName = null,
+                lpszClassName = ConstantsHandler.WINDOW_CLASS_NAME
             };
-            RegisterClass(ref wndClass);
 
-            // Create the window
-            IntPtr hWnd = CreateWindowEx(
-                0, windowName, windowName, WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-                0, 0, 1920, 1080, IntPtr.Zero, IntPtr.Zero, hInstance, IntPtr.Zero);
-
-            // Show the window in full screen
-            ShowWindow(hWnd, SW_SHOW);
-
-            // Main message loop
-            MSG msg;
-            while (GetMessage(out msg, IntPtr.Zero, 0, 0))
+            Debug.WriteLine("Registering window class...");
+            ushort classAtom = RegisterClassW(ref wndClass);
+            if (classAtom == 0)
             {
-                TranslateMessage(ref msg);
-                DispatchMessage(ref msg);
+                int errorCode = Marshal.GetLastWin32Error();
+                Debug.WriteLine($"Failed to register window class. Error code: {errorCode}");
+                return;
             }
+
+            IntPtr hWnd = CreateWindowExW(0, wndClass.lpszClassName, windowName, WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 1920, 1080, IntPtr.Zero, IntPtr.Zero, hInstance, IntPtr.Zero);
+
+            if (hWnd == IntPtr.Zero)
+            {
+                int errorCode = Marshal.GetLastWin32Error();
+                Debug.WriteLine($"CreateWindowExW failed. Error code: {errorCode}");
+            }
+
+            Debug.WriteLine("Showing window...");
+            bool showWindowResult = ShowWindow(hWnd, SW_SHOW);
+            Debug.WriteLine($"ShowWindow: result={showWindowResult}, last error={Marshal.GetLastWin32Error()}");
+
+            Debug.WriteLine("Entering message loop...");
+            while (GetMessageA(out MSG msg, IntPtr.Zero, 0, 0))
+            {
+                Debug.WriteLine($"GetMessageA: msg.message={msg.message}, msg.hWnd={msg.hWnd}");
+                TranslateMessage(ref msg);
+                DispatchMessageA(ref msg);
+            }
+
+            Debug.WriteLine("Exiting message loop.");
         }
     }
 }
