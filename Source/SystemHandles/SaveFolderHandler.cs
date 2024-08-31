@@ -94,22 +94,22 @@ namespace OpenVikings.SystemHandles
             return defaultConfigurations;
         }
 
-        private static Dictionary<string, string> ParseINIFile(string dateiPfad)
+        private static Dictionary<string, string> ParseINIFile(string filePath)
         {
             Dictionary<string, string> optionSetting = [];
 
-            foreach (string line in File.ReadLines(dateiPfad))
+            foreach (string line in File.ReadLines(filePath))
             {
                 string cleanedLine = line.Trim();
                 if (string.IsNullOrWhiteSpace(cleanedLine))
                     continue;
 
-                string[] teile = cleanedLine.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+                string[] entries = cleanedLine.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 
-                if (teile.Length == 2)
+                if (entries.Length == 2)
                 {
-                    string key = teile[0];
-                    string value = teile[1];
+                    string key = entries[0];
+                    string value = entries[1];
 
                     optionSetting[key] = value;
                 }
