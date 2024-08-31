@@ -1,5 +1,7 @@
-﻿using System.Runtime.InteropServices;
+﻿using OpenVikings.SystemHandles;
+using System.Runtime.InteropServices;
 using System.Text;
+using static OpenVikings.SystemHandles.MutexHandler;
 
 class Program
 {
@@ -152,7 +154,6 @@ class Program
     private static int data_56b3dc;
     private static int data_569cd0;
     private static int data_56b3d4;
-    private static IntPtr data_56b708 = IntPtr.Zero; // Beispielinitialisierung, anpassen nach Bedarf
     private static IntPtr data_569bbc = Marshal.AllocHGlobal(0x104); // Puffer für den Modulnamen
     private static IntPtr data_56b714 = IntPtr.Zero; // Beispielinitialisierung, anpassen nach Bedarf
     private static IntPtr data_569a30;
@@ -163,90 +164,171 @@ class Program
     private static int data_4fe05c = 0;
     private static int data_4fe000 = 0;
     private static readonly IntPtr data_56b4e1;
+    private static IntPtr data_50f624;
+    private static IntPtr data_50f620;
+    private static IntPtr data_5697ec;
+    private static IntPtr data_50f6a4;
+    private static IntPtr data_554d74;
+    private static IntPtr data_50f698;
+    private static IntPtr data_50f69c;
+    private static IntPtr data_4fe164;
+    private static Mutex? mutex;
 
     #endregion
 
 
     private delegate void FunctionDelegate();
 
-
-    static int Main()
+    // sub_401000(
+    [STAThread]
+    static void Main(string[] args)
     {
-        int var_4 = 0;
-        int var_8 = unchecked((int)0xffffffff);
-        int var_c = 0x4fb998;
-        int var_10 = 0x4ec734;
+        ArgumentHandler argumentHandler = new();
+        argumentHandler.HandleArguments(args);
 
-        // Windows TEB and Exception Handling cannot be directly translated
-        // This part is highly system-specific and is not directly accessible from C#
-        // fsbase->NtTib.ExceptionList and similar operations skipped
-
-        int ebx = 0;
-        int var_70 = ebx;
-        int esi = 0;
-        int var_74 = esi;
-        int edi = 0;
-        int var_78 = edi;
-        int[] var_1c = { var_78 };
-
-        uint eax_1 = GetVersion();
-        byte edx = (byte)((eax_1 >> 8) & 0xFF);
-        int data_569a10 = edx;
-        uint ecx_1 = eax_1;
-        int data_569a0c = (int)ecx_1;
-        int data_569a08 = ((int)(ecx_1 << 8) + edx);
-        int data_569a04 = (int)(eax_1 >> 16);
-
-        if (sub_4ec5de(1) == 0)
+        if (TryCreateMutex("weltwunder") == MutexCreationResult.Success)
         {
-            sub_4e71cb(0x1c);
-            return 0;
-        }
-
-        if (sub_4eb167() == 0)
-        {
-            sub_4e71cb(0x10);
-            return 0;
-        }
-
-        var_8 = 0;
-        sub_4ea927();
-
-        data_56b714 = GetCommandLineA();
-        IntPtr eax_6 = sub_4ec337();
-        int data_569994 = (int)eax_6.ToInt64();
-
-        sub_4ec0ea(data_569994);
-        sub_4ec031();
-        sub_4ea109();
-
-        byte var_34 = 0;
-        STARTUPINFO lpStartupInfo;
-        GetStartupInfoA(out lpStartupInfo);
-
-        IntPtr eax_7 = sub_4ebfd9();
-        uint eax_8;
-
-        if ((var_34 & 1) == 0)
-        {
-            eax_8 = 0xa;
+           // argumentHandler.SetGfxFullscreen("1");
+           // argumentHandler.SetGfxFullscreenToggle("1");
+           // argumentHandler.SetGfxScreenWidth("1280");
+           // argumentHandler.SetGfxScreenHeight("720");
+           // argumentHandler.SetGfxScreenDepth("32");
+           // argumentHandler.SetFxQuality("2");
+           // argumentHandler.SetDmOff("1");
+           // argumentHandler.SetDmVolume("80");
+           // argumentHandler.SetCdaOff("false");
         }
         else
         {
-            short var_30 = 0; // var_30 should be appropriately calculated
-            eax_8 = (uint)var_30;
+            Environment.Exit(0);
         }
 
-        sub_403487(GetModuleHandleA(IntPtr.Zero), 0, eax_7, eax_8);
+        IntPtr arg1 = sub_4e5ddd(0x18);
+        IntPtr arg4 = sub_4e5ddd(0x18);
 
-        int var_64 = 0;
-        sub_4ea136(0);
+        sub_4e5df0(arg1, 0, 0x168);
+        Marshal.WriteInt32(arg1, 3);
+        Marshal.WriteInt32(arg1 + 4, 0);
 
-        int[] var_18 = { 0 };
-        int ecx_7 = Marshal.ReadInt32(new IntPtr(var_18[0]));
-        int var_6c = ecx_7;
+        IntPtr eax = sub_4e5ddd(1);
+        if (eax != IntPtr.Zero)
+            sub_4069f3(eax);
 
-        return sub_4ebe61(ecx_7, var_18);
+        sub_4065e2("logs");
+        IntPtr eax_1 = sub_4e5ddd(0x18);
+        if (eax_1 != IntPtr.Zero)
+            sub_4e1408(eax_1);
+
+        data_5697ec = IntPtr.Zero;
+        sub_4e178f();
+        data_5697ec = IntPtr.Zero;
+        sub_4e1551("game.ini");
+        sub_4e1463(data_5697ec, arg4);
+        sub_4e1ca0(data_5697ec);
+
+        byte var_5 = 0;
+        int edi = 9;
+
+        do
+        {
+            IntPtr var_6c = Marshal.AllocHGlobal(0x100); // Arbitrary size for buffer
+            sub_4e5d8b(var_6c, $"use_data_file_{edi}");
+
+            IntPtr eax_2 = sub_4e1658(var_6c);
+            if (eax_2 != IntPtr.Zero && sub_4e5d10(eax_2) > 0 && sub_40659c(eax_2, 0) != 0)
+            {
+                IntPtr eax_5 = sub_4e5ddd(0x14);
+                uint eax_6 = eax_5 == IntPtr.Zero ? 0 : sub_40665d(eax_5);
+
+                sub_4064e4(eax_6);
+                var_5 = 1;
+            }
+            edi--;
+        } while (edi >= 0);
+
+        if (var_5 == 0)
+        {
+            for (int i = 10; i >= 1; i--)
+            {
+                IntPtr var_6c = Marshal.AllocHGlobal(0x100); // Arbitrary size for buffer
+                sub_4e5d8b(var_6c, $"datax\\libs\\data{i:D4}.lib");
+
+                if (sub_40659c(var_6c, 0) != 0)
+                {
+                    IntPtr eax_8 = sub_4e5ddd(0x14);
+                    uint eax_9 = eax_8 == IntPtr.Zero ? 0 : sub_40665d(eax_8);
+
+                    sub_4064e4(eax_9);
+                }
+            }
+        }
+
+        sub_4063f9("$gameroot$", data_4fe164);
+
+        if (sub_406542("datax\\mouse\\mousenormal.cur", arg1) != 0)
+        {
+            Marshal.WriteIntPtr(arg1 + 0x150, LoadCursorFromFileA(arg1));
+        }
+
+        if (sub_406542("datax\\mouse\\mousepressed.cur", arg1) != 0)
+        {
+            Marshal.WriteIntPtr(arg1 + 0x154, LoadCursorFromFileA(arg1));
+        }
+
+        if (sub_406542("datax\\mouse\\mouseright.cur", arg1) != 0)
+        {
+            Marshal.WriteIntPtr(arg1 + 0x158, LoadCursorFromFileA(arg1));
+        }
+
+        sub_405ac8(sub_4e163b("set_language"));
+
+        if (sub_4791a6(data_554d74) != 0)
+        {
+            Marshal.WriteInt32(arg1 + 0x0c, (int)sub_478d16(data_554d74));
+            Marshal.WriteInt32(arg1 + 0x10, (int)sub_478d27(data_554d74));
+            Marshal.WriteInt32(arg1 + 0x14, (int)sub_478d5e(data_554d74));
+            IntPtr eax_36 = data_554d74;
+            SendMessageA(sub_478ced(eax_36), 0x80, 0, LoadIconA((uint)Marshal.ReadInt32(eax_36), 0x65));
+            SendMessageA(sub_478ced(eax_36), 0x80, 1, LoadIconA((uint)Marshal.ReadInt32(eax_36), 0x66));
+            SendMessageA(sub_478ced(data_554d74), 0x0c, 0, Marshal.StringToHGlobalAnsi("Weltwunder"));
+            sub_4016ee(arg1);
+
+            if (Marshal.ReadByte(arg1 + 0x14c) != 0)
+            {
+                sub_478b53(Marshal.ReadIntPtr(arg1 + 0x150));
+            }
+
+            sub_401750(arg1);
+
+            IntPtr eax_42 = sub_4e5ddd(0x4300);
+            if (eax_42 != IntPtr.Zero)
+                sub_40471f(eax_42, sub_478ced(data_554d74), 1);
+
+            sub_4e163b("fx_quality");
+            sub_404aac(data_50f6a4, sub_4e163b("fx_volume"));
+
+            if (sub_4e163b("music_mode") == 2)
+            {
+                sub_4e167d(data_5697ec, "music_mode", 1, 1, IntPtr.Zero);
+            }
+
+            IntPtr eax_49 = sub_4e5ddd(0x224);
+            if (eax_49 != IntPtr.Zero)
+                sub_403524(eax_49);
+
+            GetCurrentDirectoryA(0x103, arg1);
+            sub_4e5c30(arg1, "\\datax\\dm2\\");
+            sub_4035b6(data_50f698, IntPtr.Zero, arg1);
+
+            sub_403932(data_50f698, sub_4e163b("dm_volume"));
+
+            if (sub_4e163b("music_mode") == 3)
+            {
+                sub_4e167d(data_5697ec, "music_mode", 1, 1, IntPtr.Zero);
+            }
+
+            Marshal.WriteInt32(arg1, 2);
+        }
     }
 
     private static int sub_4ec5de(int arg1)
@@ -781,42 +863,6 @@ class Program
         Marshal.Copy(buffer, 0, destination, length);
     }
 
-    private static int sub_4ec0ea(int arg1)
-    {
-        int var_8 = arg1;
-        int var_c = arg1;
-
-        if (data_56b708 == IntPtr.Zero)
-        {
-            sub_4ecf94();
-        }
-
-        GetModuleFileNameA(IntPtr.Zero, data_569bbc, 0x104);
-        string moduleFileName = Marshal.PtrToStringAnsi(data_569bbc);
-        data_569a30 = data_569bbc;
-        string edi = moduleFileName;
-
-        if (Marshal.ReadByte(data_56b714) != 0)
-        {
-            edi = Marshal.PtrToStringAnsi(data_56b714);
-        }
-
-        sub_4ec183(edi, IntPtr.Zero, IntPtr.Zero, ref var_8, ref var_c);
-        IntPtr eax_3 = sub_4e85fc(var_c + (var_8 << 2));
-
-        if (eax_3 == IntPtr.Zero)
-        {
-            sub_4e71a6(8);
-        }
-
-        sub_4ec183(edi, eax_3, eax_3 + (var_8 << 2), ref var_8, ref var_c);
-        int result = var_8 - 1;
-        data_569a18 = eax_3;
-        data_569a14 = result;
-
-        return result;
-    }
-
     private static IntPtr sub_4ec183(string arg1, IntPtr arg2, IntPtr arg3, ref int arg4, ref int arg5)
     {
         int localArg5 = arg5;
@@ -1058,15 +1104,6 @@ class Program
         }
     }
 
-    private static void sub_4ecf94()
-    {
-        if (data_56b708 == IntPtr.Zero)
-        {
-            sub_4ecbbc(0xfffffffd);
-            data_56b708 = new IntPtr(1);
-        }
-    }
-   
     private static int sub_4ecbbc(uint arg1)
     {
         sub_4ebdeb(0x19);
@@ -1187,70 +1224,6 @@ class Program
 
         result = 0;
         sub_4ebe4c(0x19);
-        return result;
-    }
-    
-    private static IntPtr sub_4ec031()
-    {
-        if (data_56b708 == IntPtr.Zero)
-        {
-            sub_4ecf94();
-        }
-
-        IntPtr esi = data_569994;
-        int edi = 0;
-
-        while (true)
-        {
-            byte eax = Marshal.ReadByte(esi);
-
-            if (eax == 0)
-                break;
-
-            if (eax != 0x3d) // '=' Zeichen
-            {
-                edi += 1;
-            }
-
-            esi = IntPtr.Add(esi, sub_4e5d10(esi) + 1);
-        }
-
-        IntPtr esi_1 = sub_4e85fc(edi * IntPtr.Size);
-        data_569a20 = esi_1;
-
-        if (esi_1 == IntPtr.Zero)
-        {
-            sub_4e71a6(9);
-        }
-
-        IntPtr edi_1 = data_569994;
-
-        while (Marshal.ReadByte(edi_1) != 0)
-        {
-            int ebp_2 = sub_4e5d10(edi_1) + 1;
-
-            if (Marshal.ReadByte(edi_1) != 0x3d) // '=' Zeichen
-            {
-                IntPtr eax_4 = sub_4e85fc(ebp_2);
-                Marshal.WriteIntPtr(esi_1, eax_4);
-
-                if (eax_4 == IntPtr.Zero)
-                {
-                    sub_4e71a6(9);
-                }
-
-                sub_4e5c20(eax_4, edi_1);
-                esi_1 = IntPtr.Add(esi_1, IntPtr.Size);
-            }
-
-            edi_1 = IntPtr.Add(edi_1, ebp_2);
-        }
-
-        IntPtr result = sub_4e8513(data_569994);
-        data_569994 = IntPtr.Zero;
-        Marshal.WriteIntPtr(esi_1, IntPtr.Zero);
-        data_56b704 = 1;
-
         return result;
     }
 
@@ -1510,9 +1483,6 @@ class Program
             arg1 = IntPtr.Add(arg1, IntPtr.Size);
         }
     }
-
-    private static IntPtr sub_4ebfd9() { return IntPtr.Zero; }
-    private static void sub_403487(IntPtr hModule, int arg1, IntPtr arg2, uint arg3) { }
     private static void sub_4ea136(int value) { }
     private static int sub_4ebe61(int value1, int[] value2) { return 0; }
     private static uint sub_4ecd69(uint arg)
@@ -1536,5 +1506,93 @@ class Program
     private static void sub_4ebe4c(int arg)
     {
         Console.WriteLine($"sub_4ebe4c aufgerufen mit Argument: {arg}");
+    }
+    private static void sub_4069f3(IntPtr arg) { }
+    private static void sub_4065e2(string arg) { }
+    private static void sub_4e1408(IntPtr arg) { }
+    private static void sub_4e178f() { }
+    private static void sub_4e1551(string arg) { }
+    private static void sub_4e1463(IntPtr arg1, string arg2) { }
+    private static void sub_4e1ca0(IntPtr arg) { }
+    private static void sub_4e5d8b(IntPtr arg1, string format) { }
+    private static IntPtr sub_4e1658(IntPtr arg) { return IntPtr.Zero; }
+    private static int sub_40659c(IntPtr arg1, int arg2) { return 0; }
+    private static uint sub_40665d(IntPtr arg) { return 0; }
+    private static void sub_4064e4(uint arg) { }
+    private static void sub_479076(IntPtr arg) { }
+    private static int sub_4e163b(string arg) { return 0; }
+    private static void sub_4016ea() { }
+    private static void sub_4790cd(IntPtr arg1, IntPtr arg2) { }
+    private static void sub_4063f9(string arg1, IntPtr arg2) { }
+    private static int sub_406542(string arg1, IntPtr arg2) { return 0; }
+    private static IntPtr LoadCursorFromFileA(IntPtr arg) { return IntPtr.Zero; }
+    private static void sub_405ac8(int arg) { }
+    private static int sub_4791a6(IntPtr arg) { return 0; }
+    private static uint sub_478d16(IntPtr arg) { return 0; }
+    private static uint sub_478d27(IntPtr arg) { return 0; }
+    private static uint sub_478d5e(IntPtr arg) { return 0; }
+    private static IntPtr sub_478ced(IntPtr arg) { return IntPtr.Zero; }
+    private static IntPtr LoadIconA(uint hInstance, int lpIconName) { return IntPtr.Zero; }
+    private static IntPtr SendMessageA(IntPtr hWnd, uint Msg, int wParam, IntPtr lParam) { return IntPtr.Zero; }
+    private static void sub_4016ee(IntPtr arg) { }
+    private static void sub_478b53(IntPtr arg) { }
+    private static void sub_401750(IntPtr arg) { }
+    private static void sub_40471f(IntPtr arg1, IntPtr arg2, int arg3) { }
+    private static void sub_404aac(IntPtr arg1, int arg2) { }
+    private static void sub_403524(IntPtr arg) { }
+    private static void GetCurrentDirectoryA(int nBufferLength, IntPtr lpBuffer) { }
+    private static void sub_4e5c30(IntPtr arg1, string arg2) { }
+    private static void sub_4035b6(IntPtr arg1, IntPtr arg2, IntPtr arg3) { }
+    private static void sub_403932(IntPtr arg1, int arg2) { }
+    private static void sub_4e167d(IntPtr arg1, string arg2, int arg3, int arg4, IntPtr arg5) { }
+    private static IntPtr sub_402761() { return IntPtr.Zero; }
+    private static void sub_403e45(IntPtr arg) { }
+    private static void sub_403e6f(IntPtr arg1, IntPtr arg2) { }
+    private static void sub_4e1463(IntPtr arg1, IntPtr arg2) { }
+    private static void sub_4e5df0(IntPtr ptr, byte value, int size)
+    {
+        // Entspricht memset(ptr, value, size) in C
+        for (int i = 0; i < size; i++)
+        {
+            Marshal.WriteByte(ptr, i, value);
+        }
+    }
+
+    private static IntPtr sub_4e5ddd(int size)
+    {
+        return Marshal.AllocHGlobal(size);
+    }
+
+    private static bool sub_40234f()
+    {
+        // Implementierung der Funktion
+        return true;
+    }
+
+    private static int sub_4799d8(IntPtr data)
+    {
+        // Implementierung der Funktion
+        return 1;
+    }
+
+    private static int sub_40241e(IntPtr data)
+    {
+        // Implementierung der Funktion
+        return 0;
+    }
+
+    private static void sub_4023ae(IntPtr data)
+    {
+        // Implementierung der Funktion
+    }
+
+    private static void sub_4015fb(IntPtr data)
+    {
+        // Implementierung der Funktion
+    }
+
+    private static void sub_4e5e48(IntPtr data)
+    {
+        Marshal.FreeHGlobal(data);
     }
 }
