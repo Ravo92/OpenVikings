@@ -1,7 +1,7 @@
 # OpenVikings
 An Open-Source Engine Replacement for Cultures 2: The Gates of Asgards, Cultures - 8th Wonder of the World, and Cultures - Northland
 
-OpenVikings is a fan-made, open-source project that intends to become a fully compatible engine replacement for Funatics' iconic 2D platformer games. The project's goals include fixing the original games' bugs and also eventually providing a modding interface, alongside of course making it possible to study or use the engine for new projects.
+OpenVikings is a fan-made, open-source project that intends to become a fully compatible engine replacement for Funatics' iconic 2D strategy and building simulation games. The project's goals include fixing the original games' bugs and also eventually providing a modding interface, alongside of course making it possible to study or use the engine for new projects.
 
 ## License
 
