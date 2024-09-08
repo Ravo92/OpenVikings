@@ -216,7 +216,7 @@ class Program
         PathHandler.GetFolderPath("logs");
 
         SaveFolderHandler saveFolderHandler = new();
-        saveFolderHandler.SetOptionsGameSettingsINIFile("opt_game.ini");
+        saveFolderHandler.SetOptionsGameSettingsINIFile("game.ini");
 
         sub_4e1463(data_5697ec, arg4);
         sub_4e1ca0(data_5697ec);
