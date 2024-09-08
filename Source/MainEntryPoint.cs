@@ -181,6 +181,8 @@ class Program
         ArgumentHandler argumentHandler = new();
         argumentHandler.HandleArguments(args);
 
+        // TODO: Add sub_4e1816() as opt_glob.ini checker and also evaluate all other routes for ini files and settings.
+
         if (TryCreateMutex("weltwunder") == MutexCreationResult.Success)
         {
             InitGameHandler.InitGame();
@@ -211,15 +213,11 @@ class Program
         if (eax != IntPtr.Zero)
             sub_4069f3(eax);
 
-        sub_4065e2("logs");
-        IntPtr eax_1 = sub_4e5ddd(0x18);
-        if (eax_1 != IntPtr.Zero)
-            sub_4e1408(eax_1);
+        PathHandler.GetFolderPath("logs");
 
-        data_5697ec = IntPtr.Zero;
-        sub_4e178f();
-        data_5697ec = IntPtr.Zero;
-        sub_4e1551("game.ini");
+        SaveFolderHandler saveFolderHandler = new();
+        saveFolderHandler.SetOptionsGameSettingsINIFile("opt_game.ini");
+
         sub_4e1463(data_5697ec, arg4);
         sub_4e1ca0(data_5697ec);
 
@@ -1505,9 +1503,6 @@ class Program
         Console.WriteLine($"sub_4ebe4c aufgerufen mit Argument: {arg}");
     }
     private static void sub_4069f3(IntPtr arg) { }
-    private static void sub_4065e2(string arg) { }
-    private static void sub_4e1408(IntPtr arg) { }
-    private static void sub_4e178f() { }
     private static void sub_4e1551(string arg) { }
     private static void sub_4e1463(IntPtr arg1, string arg2) { }
     private static void sub_4e1ca0(IntPtr arg) { }

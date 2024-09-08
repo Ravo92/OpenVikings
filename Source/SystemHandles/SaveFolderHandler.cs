@@ -39,9 +39,9 @@ namespace OpenVikings.SystemHandles
             return true;
         }
 
-        private bool SetOptionsGameSettingsINIFile()
+        internal bool SetOptionsGameSettingsINIFile(string fileName = "opt_game.ini")
         {
-            string filePathWithININame = Path.Combine(savesFolderPath, ConstantsHandler.OPT_GAME_INI_NAME);
+            string filePathWithININame = Path.Combine(savesFolderPath, fileName);
 
             if (!File.Exists(filePathWithININame))
             {
@@ -59,21 +59,10 @@ namespace OpenVikings.SystemHandles
                 }
                 catch (Exception)
                 {
-                    Debug.WriteLine("Failed to create opt_game.ini");
+                    Debug.WriteLine("Failed to create {0}", filePathWithININame);
                     return false;
                 }
             }
-
-            return true;
-        }
-
-        private bool SetDefaultConfigurations()
-        {
-            if (!SetSaveFolder())
-                return false;
-
-            if (!SetOptionsGameSettingsINIFile())
-                return false;
 
             return true;
         }
@@ -120,7 +109,7 @@ namespace OpenVikings.SystemHandles
 
         internal void InitializeConfigurations()
         {
-            if (SetDefaultConfigurations())
+            if (SetOptionsGameSettingsINIFile("opt_game.ini"))
             {
                 Debug.WriteLine("Default configurations are set successfully.");
             }
